@@ -1,0 +1,4 @@
+Go to Index.php
+
+Enter user id: admin
+Password: admin
