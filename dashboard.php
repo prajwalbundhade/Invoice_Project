@@ -123,19 +123,21 @@ include 'dbconn.php';
                         <span class="text">
                             <?php
 
-					$select_query = "select SUM(total_amount_after_taxes) as total_sum from customer_details";
-					$result = mysqli_query($conn, $select_query);
+                       $select_query = "SELECT SUM(total_amount_after_taxes) AS total_sales FROM final_bill";
+                       $result = mysqli_query($conn, $select_query);
 
-					if($result-> num_rows>0){
-						$row = $result->fetch_assoc();
-						$sum = $row["total_sum"];
-						$sum1 = number_format($sum, 2);
-						
-					}
+                       if ($result && mysqli_num_rows($result) > 0) {
+                           $row = mysqli_fetch_assoc($result);
+                           $totalSales = $row["total_sales"];
+                           
+                           // Format the total sales amount to two decimal places
+                           $formattedTotalSales = number_format($totalSales, 2);
+                           
+                       }
 
 
 						?>
-                            <h3><?php echo $sum1 ?></h3>
+                            <h3><?php echo $formattedTotalSales ?></h3>
                             <p>Total Sales</p>
                         </span>
                     </li>
@@ -147,7 +149,7 @@ include 'dbconn.php';
                         </span>
                     </li>
                     <li>
-                        <a href="new_bill.php"><i class="fa-solid fa fa-plus"></i></a>
+                        <a href="new_bill2.php"><i class="fa-solid fa fa-plus"></i></a>
                         <span class="text">
                             <!-- <h3>43</h3> -->
                             <p>New Bill</p>
@@ -170,59 +172,65 @@ include 'dbconn.php';
         </main>
 
         <section class="container">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th scope="col">Bill Number</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Address</th>
-                        <th scope="col">Date</th>
-                        <th scope="col">Description</th>
-                        <th scope="col">Net Weight</th>
-                        <th scope="col">Rate</th>
-                        <th scope="col">Total Amount</th>
-                        <th>Invoice</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-            $sql2 = "SELECT
-			`customer_id`,
-			`name`,
-			`date`,
-			`address`,
-			`description`,
-			`net_weight`,
-			`rate`,
-			`total_amount_after_taxes`
-		FROM
-			`customer_details`";
-			echo mysqli_error($conn);
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Bill Number</th>
+                <th scope="col">Name</th>
+                <th scope="col">Address</th>
+                <th scope="col">Date</th>
+                <th scope="col">Description</th>
+                <th scope="col">Total Amount</th>
+                <th>Invoice</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            // Assuming you have already established a database connection
 
-            $result2 = mysqli_query($conn, $sql2);
-			
-			$i =1;
-            while ($rows = mysqli_fetch_assoc($result2)) {
+            // Modify the SQL query to fetch data from your tables using JOIN
+            $sql = "SELECT
+                ncd.`customer_id`,
+                ncd.`name`,
+                ncd.`address`,
+                ncd.`date`,
+                GROUP_CONCAT(pd.`description` SEPARATOR ', ') AS `description`,
+                fb.`total_amount_after_taxes`
+            FROM
+                `new_customer_details` ncd
+            LEFT JOIN
+                `final_bill` fb ON ncd.`customer_id` = fb.`customer_id`
+            LEFT JOIN
+                `product_details` pd ON ncd.`customer_id` = pd.`customer_id`
+            GROUP BY
+                ncd.`customer_id`";  // Modify table and column names as needed
+
+            $result = mysqli_query($conn, $sql);
+
+            $i = 1;
+            while ($row = mysqli_fetch_assoc($result)) {
             ?>
-                    <tr>
-                        
-						<td><?php echo $rows['customer_id']; ?></td>
-                        <td><?php echo $rows['name']; ?></td>
-                        <td><?php echo $rows['address']; ?></td>
-                        <td><?php echo $rows['date']; ?></td>
-                        <td><?php echo $rows['description']; ?></td>
-                        <td><?php echo $rows['net_weight']; ?></td>
-                        <td><?php echo $rows['rate']; ?></td>
-                        <td><?php echo $rows['total_amount_after_taxes']; ?></td>
-                        <td><a href="view_details.php?customer_id=<?php echo $rows['customer_id']; ?>" class="btn btn-primary"><i
-                                    class="fa fa-eye"></i> View Bill</a></td>
-                    </tr>
-                    <?php
+                <tr>
+                    <td><b><?php echo $row['customer_id']; ?></b></td> <!-- Customer ID as Bill Number -->
+                    <td><?php echo $row['name']; ?></td>
+                    <td><?php echo $row['address']; ?></td>
+                    <td><?php echo $row['date']; ?></td>
+                    <td><?php echo $row['description']; ?></td>
+                    <td><?php echo $row['total_amount_after_taxes']; ?></td>
+                    <td><a href="view.php?customer_id=<?php echo $row['customer_id']; ?>"
+                            class="btn btn-primary"><i class="fa fa-eye"></i> View Bill</a></td>
+                </tr>
+                <?php
+                $i++;
             }
             ?>
-                </tbody>
-            </table>
-        </section>
+        </tbody>
+    </table>
+</section>
+
+
+
+
 
 
 

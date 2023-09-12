@@ -8,6 +8,8 @@
     body {
         font-family: Arial, sans-serif;
         color: #333;
+        margin: 0;
+        padding: 0;
     }
 
     .invoice {
@@ -27,6 +29,7 @@
         font-size: 28px;
         font-weight: bold;
         color: #555;
+        margin: 0;
     }
 
     .address {
@@ -52,7 +55,6 @@
     }
 
     .total-table {
-
         margin-top: 20px;
         width: 100%;
         text-align: right;
@@ -60,7 +62,6 @@
 
     .tax-details {
         width: 50%;
-
         margin-top: 20px;
     }
 
@@ -71,12 +72,10 @@
     }
 
     .signature1 {
-        /* margin-top: 30px; */
         text-align: left;
     }
 
     .signature2 {
-        /* margin-top: 30px; */
         text-align: right;
     }
     </style>
@@ -92,13 +91,9 @@
             </div>
             <div class="row">
                 <div class="col-md-6">
-
-                    <div>
-                        Mob No.: 8482855422
-                    </div>
+                    <div>Mob No.: 8482855422</div>
                     <div>GST No.: 27EYUPS6827P1ZY</div>
                 </div>
-                <hr>
             </div>
             <div class="customer-details">
                 <div><strong>Date:</strong> <?php echo $purchaseDetails['date']; ?></div>
@@ -120,19 +115,27 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <?php
+    
+                   // Loop through products
+                   foreach ($productDetails as $product) {
+                    
+                ?>
                     <tr>
-                        <td>1</td>
-                        <td><?php echo $purchaseDetails['description']; ?></td>
-                        <td><?php echo $purchaseDetails['net_weight']; ?></td>
-                        <td><?php echo $purchaseDetails['gross_weight1']; ?></td>
-                        <td><?php echo $purchaseDetails['hsncode']; ?></td>
-                        <td><?php echo $purchaseDetails['rate']; ?></td>
-                        <td><?php echo $purchaseDetails['labour_charge']; ?></td>
-                        <td><?php echo $purchaseDetails['total_amount']; ?></td>
+                        
+                        <td><?php echo $product['description']; ?></td>
+                        <td><?php echo $product['net_weight']; ?></td>
+                        <td><?php echo $product['gross_weight1']; ?></td>
+                        <td><?php echo $product['hsncode']; ?></td>
+                        <td><?php echo $product['rate']; ?></td>
+                        <td><?php echo $product['labour_charge']; ?></td>
+                        <td><?php echo $product['total_amount']; ?></td>
                     </tr>
-                    <!-- Add more product rows as needed -->
+                    <?php
+    }
+    ?>
                 </tbody>
-            </table><br>
+            </table>
             <div class="tax-details">
                 <table class="table total-table">
                     <tr>
@@ -160,7 +163,8 @@
             <hr>
             <div class="signature-container">
                 <div class="signature1">
-                    Customer Signature:</div>
+                    Customer Signature:
+                </div>
                 <div class="signature2">
                     Shop Owner Signature:
                 </div>

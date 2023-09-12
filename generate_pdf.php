@@ -5,8 +5,30 @@ require_once('TCPDF-main/tcpdf.php'); // Path to TCPDF library
 if (isset($_GET['customer_id'])) {
     $billNumber = $_GET['customer_id'];
 
-    // Fetch customer purchase details based on the bill number
-    $sql = "SELECT * FROM `customer_details` WHERE `customer_id` = '$billNumber'";
+    // Fetch customer details, product details, and final bill details based on the bill number
+    $sql = "SELECT
+                ncd.`customer_id`,
+                ncd.`name`,
+                ncd.`state`,
+                ncd.`address`,
+                ncd.`date`,
+                pd.`description`,
+                pd.`net_weight`,
+                pd.`gross_weight`,
+                pd.`hsncode`,
+                pd.`rate`,
+                pd.`labour_charge`,
+                pd.`total_amount`,
+                fb.`total_amount`,
+                fb.`sgst_amount`,
+                fb.`cgst_amount`,
+                fb.`gst_total`,
+                fb.`total_amount_after_taxes`
+            FROM `new_customer_details` ncd
+            INNER JOIN `product_details` pd ON ncd.`customer_id` = pd.`customer_id`
+            INNER JOIN `final_bill` fb ON ncd.`customer_id` = fb.`customer_id`
+            WHERE ncd.`customer_id` = '$billNumber'";
+
     $result = mysqli_query($conn, $sql);
     $purchaseDetails = mysqli_fetch_assoc($result);
 
