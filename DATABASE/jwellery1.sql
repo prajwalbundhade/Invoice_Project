@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 12, 2023 at 01:46 PM
+-- Generation Time: Oct 03, 2023 at 06:46 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -20,42 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `jwellery1`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `customer_details`
---
-
-CREATE TABLE `customer_details` (
-  `customer_id` int(222) NOT NULL,
-  `number` int(11) NOT NULL,
-  `name` varchar(222) NOT NULL,
-  `date` date NOT NULL,
-  `gstin` varchar(222) NOT NULL,
-  `address` varchar(222) NOT NULL,
-  `state` varchar(222) NOT NULL,
-  `shop_address` varchar(222) NOT NULL,
-  `description` varchar(222) NOT NULL,
-  `karet` varchar(222) NOT NULL,
-  `hsncode` varchar(222) NOT NULL,
-  `gross_weight1` decimal(10,3) NOT NULL,
-  `net_weight` decimal(10,3) NOT NULL,
-  `rate` decimal(10,3) NOT NULL,
-  `labour_charge` decimal(10,3) NOT NULL,
-  `total_amount` decimal(10,3) NOT NULL,
-  `sgst_amount` decimal(10,3) NOT NULL,
-  `cgst_amount` decimal(10,3) NOT NULL,
-  `gst_total` decimal(10,3) NOT NULL,
-  `total_amount_after_taxes` decimal(10,3) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `customer_details`
---
-
-INSERT INTO `customer_details` (`customer_id`, `number`, `name`, `date`, `gstin`, `address`, `state`, `shop_address`, `description`, `karet`, `hsncode`, `gross_weight1`, `net_weight`, `rate`, `labour_charge`, `total_amount`, `sgst_amount`, `cgst_amount`, `gst_total`, `total_amount_after_taxes`) VALUES
-(1, 0, 'Prajwal Bundhade', '2023-09-04', 'PS123', 'Dighi', 'Maharashtra', 'Gadge Nagar, Amravati', 'Gold', '23', '2345', 12.000, 1211.000, 11.000, 11.000, 13332.000, 199.980, 199.980, 399.960, 13731.960);
 
 -- --------------------------------------------------------
 
@@ -78,9 +42,8 @@ CREATE TABLE `final_bill` (
 --
 
 INSERT INTO `final_bill` (`bill_id`, `customer_id`, `total_amount`, `sgst_amount`, `cgst_amount`, `gst_total`, `total_amount_after_taxes`) VALUES
-(1, 4, 140.00, 2.10, 2.10, 4.20, 144.20),
-(2, 5, 330.00, 4.95, 4.95, 9.90, 339.90),
-(3, 6, 110.00, 1.65, 1.65, 3.30, 113.30);
+(5, 8, 378.00, 5.67, 5.67, 11.34, 389.34),
+(6, 9, 215.00, 3.23, 3.23, 6.45, 221.45);
 
 -- --------------------------------------------------------
 
@@ -122,9 +85,8 @@ CREATE TABLE `new_customer_details` (
 --
 
 INSERT INTO `new_customer_details` (`customer_id`, `shop_address`, `gstin`, `date`, `name`, `address`, `state`) VALUES
-(4, 'Gadge Nagar, Amravati', 'PS123', '2023-09-11', 'Prajwal Bundhade', 'Hollywood colony', 'MAHARASHTRA'),
-(5, 'Gadge Nagar, Amravati', '45678', '2023-09-06', 'Prasad Bhau', 'Dighi', 'Maharashtra'),
-(6, 'Gadge Nagar, Amravati', 'PS123', '0000-00-00', 'Rushikesh Shirke', 'Gopal Nagar', '');
+(8, 'Gadge Nagar, Amravati', '123Rushi', '2023-09-13', 'Rushi Shirke', 'Gopal nagar', 'MH'),
+(9, 'Gadge Nagar, Amravati', 'PS123', '2023-09-13', 'Prajwal B', 'Dighi', 'Maharashtra');
 
 -- --------------------------------------------------------
 
@@ -138,10 +100,10 @@ CREATE TABLE `product_details` (
   `description` varchar(255) DEFAULT NULL,
   `karet` varchar(255) DEFAULT NULL,
   `hsncode` varchar(255) DEFAULT NULL,
-  `gross_weight` decimal(10,8) DEFAULT NULL,
-  `net_weight` decimal(10,6) DEFAULT NULL,
-  `rate` decimal(10,6) DEFAULT NULL,
-  `labour_charge` decimal(10,7) DEFAULT NULL,
+  `gross_weight` decimal(10,2) DEFAULT NULL,
+  `net_weight` decimal(10,2) DEFAULT NULL,
+  `rate` decimal(10,2) DEFAULT NULL,
+  `labour_charge` decimal(10,2) DEFAULT NULL,
   `total_amount` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -150,22 +112,15 @@ CREATE TABLE `product_details` (
 --
 
 INSERT INTO `product_details` (`product_id`, `customer_id`, `description`, `karet`, `hsncode`, `gross_weight`, `net_weight`, `rate`, `labour_charge`, `total_amount`) VALUES
-(1, 4, 'gold', '23', '234', 12.00000000, 10.000000, 10.000000, 10.0000000, 110.00),
-(2, 4, 'silver', '23', '234', 10.00000000, 5.000000, 5.000000, 5.0000000, 30.00),
-(3, 5, 'gold', '23', '234', 12.00000000, 10.000000, 10.000000, 10.0000000, 110.00),
-(4, 5, 'gold', '23', 'r', 12.00000000, 10.000000, 10.000000, 10.0000000, 110.00),
-(5, 5, 'gold', '23', 'r', 12.00000000, 10.000000, 10.000000, 10.0000000, 110.00),
-(6, 6, 'gold', '23', '234', 12.00000000, 10.000000, 10.000000, 10.0000000, 110.00);
+(11, 8, 'Gold', '24', '234', 12.00, 10.00, 10.00, 10.00, 110.00),
+(12, 8, 'Silver', '24', '234', 10.00, 8.00, 10.00, 10.00, 90.00),
+(13, 8, 'Ring', '18', '234', 15.00, 14.00, 12.00, 10.00, 178.00),
+(14, 9, 'Ring', '23', '11234', 12.00, 11.00, 11.00, 1.00, 122.00),
+(15, 9, 'Chain', '23', '11234', 12.00, 9.00, 10.00, 3.00, 93.00);
 
 --
 -- Indexes for dumped tables
 --
-
---
--- Indexes for table `customer_details`
---
-ALTER TABLE `customer_details`
-  ADD PRIMARY KEY (`customer_id`);
 
 --
 -- Indexes for table `final_bill`
@@ -192,28 +147,22 @@ ALTER TABLE `product_details`
 --
 
 --
--- AUTO_INCREMENT for table `customer_details`
---
-ALTER TABLE `customer_details`
-  MODIFY `customer_id` int(222) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
 -- AUTO_INCREMENT for table `final_bill`
 --
 ALTER TABLE `final_bill`
-  MODIFY `bill_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `bill_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `new_customer_details`
 --
 ALTER TABLE `new_customer_details`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `product_details`
 --
 ALTER TABLE `product_details`
-  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- Constraints for dumped tables

@@ -3,10 +3,6 @@ include 'dbconn.php';
 
 ?>
 
-<!-- sales, bills, new bill, search btn, print , update. -->
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -149,7 +145,7 @@ include 'dbconn.php';
                         </span>
                     </li>
                     <li>
-                        <a href="new_bill2.php"><i class="fa-solid fa fa-plus"></i></a>
+                        <a href="new_bill.php"><i class="fa-solid fa fa-plus"></i></a>
                         <span class="text">
                             <!-- <h3>43</h3> -->
                             <p>New Bill</p>
@@ -181,7 +177,7 @@ include 'dbconn.php';
                 <th scope="col">Date</th>
                 <th scope="col">Description</th>
                 <th scope="col">Total Amount</th>
-                <th>Invoice</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -218,7 +214,12 @@ include 'dbconn.php';
                     <td><?php echo $row['description']; ?></td>
                     <td><?php echo $row['total_amount_after_taxes']; ?></td>
                     <td><a href="view.php?customer_id=<?php echo $row['customer_id']; ?>"
-                            class="btn btn-primary"><i class="fa fa-eye"></i> View Bill</a></td>
+                            class="btn btn-primary"><i class="fa fa-eye"></i></a>
+                            <!-- edit bill  -->
+                            <a href="update_bill.php?customer_id=<?php echo $row['customer_id']; ?>"
+                            class="btn btn-danger"><i class="fa fa-edit"></i></a>
+                    </td>
+                            
                 </tr>
                 <?php
                 $i++;

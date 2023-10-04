@@ -1,56 +1,34 @@
 <?php
+require 'vendor/autoload.php';
 include 'dbconn.php';
-require_once('TCPDF-main/tcpdf.php'); // Path to TCPDF library
+use Dompdf\Dompdf;
 
+// Retrieve the bill number
 if (isset($_GET['customer_id'])) {
     $billNumber = $_GET['customer_id'];
 
-    // Fetch customer details, product details, and final bill details based on the bill number
-    $sql = "SELECT
-                ncd.`customer_id`,
-                ncd.`name`,
-                ncd.`state`,
-                ncd.`address`,
-                ncd.`date`,
-                pd.`description`,
-                pd.`net_weight`,
-                pd.`gross_weight`,
-                pd.`hsncode`,
-                pd.`rate`,
-                pd.`labour_charge`,
-                pd.`total_amount`,
-                fb.`total_amount`,
-                fb.`sgst_amount`,
-                fb.`cgst_amount`,
-                fb.`gst_total`,
-                fb.`total_amount_after_taxes`
-            FROM `new_customer_details` ncd
-            INNER JOIN `product_details` pd ON ncd.`customer_id` = pd.`customer_id`
-            INNER JOIN `final_bill` fb ON ncd.`customer_id` = fb.`customer_id`
-            WHERE ncd.`customer_id` = '$billNumber'";
+    // Fetch customer details, product details, and final bill details as before
 
-    $result = mysqli_query($conn, $sql);
-    $purchaseDetails = mysqli_fetch_assoc($result);
+    // Create a new Dompdf instance
+    $pdf = new Dompdf();
 
-    if ($purchaseDetails) {
-        // Generate PDF using TCPDF
-        $pdf = new TCPDF('P', PDF_UNIT, 'A4', true, 'UTF-8', false);
-        $pdf->SetTitle('Customer Purchase Details');
-        $pdf->SetPrintHeader(false);
-        $pdf->SetPrintFooter(false);
+    // Load HTML content
+    ob_start();
+    include 'pdf_template.php'; // Create a separate HTML template file
+    $html = ob_get_clean();
 
-        $pdf->AddPage();
+    $pdf->loadHtml($html);
 
-        ob_start();
-        include('pdf_template1.php');
-        $content = ob_get_clean();
+    // Set paper size and orientation (e.g., 'A4' or 'letter')
+    $pdf->setPaper('A4');
 
-        $pdf->writeHTML($content, true, false, true, false, '');
+    // Render PDF (optional: you can save the PDF instead of outputting it)
+    $pdf->render();
 
-        // Output the PDF for download
-        $pdf->Output('customer_purchase_details.pdf', 'D');
-    } else {
-        echo "No purchase details found for the provided bill number.";
-    }
+    // Output the PDF as a download
+    $pdf->stream('Customer_Purchase_Details.pdf', ['Attachment' => 0]);
+
+    // JavaScript to open the PDF in a new window/tab
+    echo '<script>window.open("data:application/pdf;base64,' . base64_encode($pdf->output()) . '","_blank");</script>';
 }
 ?>

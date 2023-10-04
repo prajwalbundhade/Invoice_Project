@@ -1,5 +1,74 @@
 <?php
-@include 'dbconn.php';
+@include 'dbconn.php'; // Include your database connection file
+
+$total_amount = 0.0;
+$sgst_amount = 0.0;
+$cgst_amount = 0.0;
+$gst_total = 0.0;
+$total_amount_after_taxes = 0.0;
+
+if (isset($_POST['submit-1'])) {
+    // Retrieve customer details from the form
+    $shop_address = $_POST['shop_address'];
+    $gstin = $_POST['gstin'];
+    $date = $_POST['date'];
+    $name = $_POST['name'];
+    $address = $_POST['address'];
+    $state = $_POST['state'];
+
+    // Insert customer details into the database
+    $customer_insert_query = "INSERT INTO new_customer_details (shop_address, gstin, date, name, address, state) 
+                              VALUES ('$shop_address', '$gstin', '$date', '$name', '$address', '$state')";
+
+    if (mysqli_query($conn, $customer_insert_query)) {
+        $customer_id = mysqli_insert_id($conn); // Get the ID of the inserted customer record
+
+        // Initialize total amount for products
+        $total_amount = 0.0;
+
+        // Loop through each product
+        foreach ($_POST['description'] as $key => $description) {
+            $karet = $_POST['karet'][$key];
+            $hsncode = $_POST['hsncode'][$key];
+            $gross_weight = $_POST['gross_weight'][$key];
+            $net_weight = (float)$_POST['net_weight'][$key];
+            $rate = (float)$_POST['rate'][$key];
+            $labour_charge = (float)$_POST['labour_charge'][$key];
+
+            // Calculate total amount for the product
+            $product_total_amount = ($net_weight * $rate) + $labour_charge;
+            
+            // Add product total to the overall total
+            $total_amount += $product_total_amount;
+
+            // Insert product details into the database
+            $product_insert_query = "INSERT INTO product_details (customer_id, description, karet, hsncode, gross_weight, net_weight, rate, labour_charge, total_amount) 
+                                     VALUES ('$customer_id', '$description', '$karet', '$hsncode', '$gross_weight', '$net_weight', '$rate', '$labour_charge', '$product_total_amount')";
+
+            mysqli_query($conn, $product_insert_query);
+        }
+
+        // Calculate GST amounts
+        $sgst_percentage = 1.5;
+        $cgst_percentage = 1.5;
+        $sgst_amount = ($total_amount * $sgst_percentage) / 100;
+        $cgst_amount = ($total_amount * $cgst_percentage) / 100;
+        $gst_total = $sgst_amount + $cgst_amount;
+        $total_amount_after_taxes = $total_amount + $gst_total;
+
+        // Insert final bill data into the database
+        $final_bill_insert_query = "INSERT INTO final_bill (customer_id, total_amount, sgst_amount, cgst_amount, gst_total, total_amount_after_taxes) 
+                                    VALUES ('$customer_id', '$total_amount', '$sgst_amount', '$cgst_amount', '$gst_total', '$total_amount_after_taxes')";
+
+        if (mysqli_query($conn, $final_bill_insert_query)) {
+            echo "Data inserted successfully.";
+        } else {
+            echo "Error: " . mysqli_error($conn);
+        }
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -21,278 +90,145 @@
 
     <div class="container">
         <h1>Tax Invoice</h1>
-        <div class="row">
-            <div class="col-sm">
+        <form action="" method="POST">
+            <!-- Customer Details Section -->
+            <!-- Customer Details -->
+            <h3>Customer Details</h3>
+            <div class="row">
+                <div class="col-md-3">
 
-                <table>
-                    <form action="" method='POST'>
-
-                        <!-- Uder detail -->
-                        <h3>Customer Details</h3>
-                        <tr>
-                            <td>
-                                <label for="">Shop Address
-                                    <input type="text" class="" name="shop_address" value="Gadge Nagar, Amravati"
-                                        readonly>
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="">GSTIN/UIN
-                                    <input type="text" class="" name="gstin" placeholder="GSTIN/UIN">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="">Date
-                                    <input type="date" class="" name="date" placeholder="Date">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="">Name of Customer
-                                    <input type="text" class="" name="name" placeholder="Ex. John cena">
-                                </label>
-                            </td>
-                        </tr>
-
-
-
-                        <tr>
-                            <td>
-                                <label for="">Customer Address
-                                    <input type="text" class="" name="address" placeholder="Enter Addres">
-                                </label>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>
-                                <label for="">State
-                                    <input type="text" class="" name="state" placeholder="State">
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-
-
-                </table>
-
-
-
-
-
-            </div>
-
-            <!-- Product detail -->
-            <div class="col-sm">
-
-
-
-                <tr>
-                    <h3>Product Details</h3>
-
-                </tr>
-                <tr>
-                    <td>
-                        <label for="">Description of goods
-                            <input type="text" class="" name="description" placeholder="Description">
-                        </label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for=""> Karet
-                            <input type="text" class="" name="karet" placeholder="Enter Karet">
-                        </label>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <label for=""> HSN Code
-                            <input type="text" class="" name="hsncode" placeholder="Enter HSN code">
-                        </label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for=""> Gross Weight
-                            <input type="number" class="" name="gross_weight1" step="0.00000001"
-                                placeholder="Enter Gross Weight in gram">
-                        </label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for=""> Net Weight
-                            <input type="number" class="" name="net_weight" step="0.000001"
-                                placeholder="Enter net weight in gram">
-                        </label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for=""> Rate
-                            <input type="number" class="" name="rate" step="0.000001" placeholder="Enter Rate in Rs.">
-                        </label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for=""> Labour Charge
-                            <input type="number" class="" name="labour_charge" step="0.0000001"
-                                placeholder="Enter labour charge">
-                        </label>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <label for="">
-                            <input type="submit" class="" name="submit-1" placeholder="Submit">
-                        </label>
-                    </td>
-                </tr>
-                <!-- Product detail end-->
-                </form>
-
-                </table>
-
-
-                    <?php
-
-        $total_amount = 0.0;
-        $sgst_amount = 0.0;
-        $cgst_amount = 0.0;
-        $gst_total = 0.0;
-        $total_amount_after_taxes = 0;
-
-    //    for customer details
-
-    if (isset($_POST['submit-1'])) {
-        // Retrieve values from the form
-        $number = $_POST['number'];
-        $name = $_POST['name'];
-        $date = $_POST['date'];
-        $gstin = $_POST['gstin'];
-        $address = $_POST['address'];
-        $state = $_POST['state'];
-        $shop_address = $_POST['shop_address'];
-
-        $description = $_POST['description'];
-        $karet = $_POST['karet'];
-        $hsncode = $_POST['hsncode'];
-        $gross_weight = $_POST['gross_weight1'];
-        $net_weight = (float)$_POST['net_weight'];
-        $rate = (float)$_POST['rate'];
-        $labour_charge = (float)$_POST['labour_charge'];
-
-        // Calculate total amount and GST
-        $total_amount = ($net_weight * $rate) + $labour_charge;
-        $sgst_percentage = 1.5;
-        $cgst_percentage = 1.5;
-        $sgst_amount = ($total_amount * $sgst_percentage) / 100;
-        $cgst_amount = ($total_amount * $cgst_percentage) / 100;
-        $gst_total = $sgst_amount + $cgst_amount;
-        $total_amount_after_taxes = $total_amount + $gst_total;
-
-        // Create the INSERT INTO query
-        $insert_query = "INSERT INTO `customer_details`(
-            `number`,
-            `name`,
-            `date`,
-            `gstin`,
-            `address`,
-            `state`,
-            `shop_address`,
-            `description`,
-            `karet`,
-            `hsncode`,
-            `gross_weight1`,
-            `net_weight`,
-            `rate`,
-            `labour_charge`,
-            `total_amount`,
-            `sgst_amount`,
-            `cgst_amount`,
-            `gst_total`,
-            `total_amount_after_taxes`)
-        VALUES (
-            '$number',
-            '$name',
-            '$date',
-            '$gstin',
-            '$address',
-            '$state',
-            '$shop_address',
-            '$description',
-            '$karet',
-            '$hsncode',
-            '$gross_weight',
-            '$net_weight',
-            '$rate',
-            '$labour_charge',
-            '$total_amount',
-            '$sgst_amount',
-            '$cgst_amount',
-            '$gst_total',
-            '$total_amount_after_taxes')";
-
-        // Execute the query
-        $query = mysqli_query($conn, $insert_query);
-
-        if ($query) {
-            echo "Customer data saved";
-        } else {
-            echo "Something went wrong";
-        }
-    }
-    ?>
+                    <div class="form-group">
+                        <label for="shop_address">Shop Address</label>
+                        <input type="text" class="form-control" id="shop_address" name="shop_address"
+                            value="Gadge Nagar, Amravati" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="gstin">GSTIN/UIN</label>
+                        <input type="text" class="form-control" id="gstin" name="gstin" placeholder="GSTIN/UIN">
+                    </div>
+                    <div class="form-group">
+                        <label for="date">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" placeholder="Date">
+                    </div>
                 </div>
-                <div class="col-sm">
-                    <?php
-    // Calculate total amount before taxes
+                <div class="col-md-3">
 
-    // Initialize variables
-
-    ?>
-                    <!-- total amount and GST  -->
-                    <h3>Final Bill</h3>
-
-
-
+                    <div class="form-group">
+                        <label for="name">Name of Customer</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Ex. John cena">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Customer Address</label>
+                        <input type="text" class="form-control" id="address" name="address" placeholder="Enter Address">
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" class="form-control" id="state" name="state" placeholder="State">
+                    </div>
+                </div>
+                <div class="col-md-6">
                     <div class="bill-container">
-
-                        <p>Total Amount before Taxes: <?php echo $total_amount; ?></p>
+                        <h3>Final Bill</h3>
+                        <p>Total Amount before Taxes: <span id="total_amount"><?php echo $total_amount; ?></span></p>
                         <b>
                             <p>Tax Amount GST 3%</p>
                         </b>
-                        <p>SGST: <?php echo $sgst_amount; ?></p>
-                        <p>CGST: <?php echo $cgst_amount; ?></p>
-                        <p>Total GST (SGST + CGST): <?php echo $gst_total; ?></p>
-
-                        <p>Total Amount after Taxes: <?php echo $total_amount_after_taxes; ?></p>
-
-
-                        <p><a href="dashboard.php" class="btn btn-danger"><i class="fa-solid fa-house"></i> Go To Home</a></p>
-
-
-
+                        <p>SGST: <span id="sgst_amount"><?php echo $sgst_amount; ?></span></p>
+                        <p>CGST: <span id="cgst_amount"><?php echo $cgst_amount; ?></span></p>
+                        <p>Total GST (SGST + CGST): <span id="gst_total"><?php echo $gst_total; ?></span></p>
+                        <p>Total Amount after Taxes: <span
+                                id="total_amount_after_taxes"><?php echo $total_amount_after_taxes; ?></span></p>
+                         <a class="btn btn-primary" href="dashboard.php">Return to Dashboard</a>     
                     </div>
                 </div>
             </div>
+
+            <!-- Product Details Section -->
+
+            <h3>Product Details</h3>
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Description of Goods</th>
+                                <th>Karet</th>
+                                <th>HSN Code</th>
+                                <th>Gross Weight</th>
+                                <th>Net Weight</th>
+                                <th>Rate (Rs.)</th>
+                                <th>Labour Charge</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" class="form-control" name="description[]"
+                                        placeholder="Description"></td>
+                                <td><input type="text" class="form-control" name="karet[]" placeholder="Enter Karet">
+                                </td>
+                                <td><input type="text" class="form-control" name="hsncode[]"
+                                        placeholder="Enter HSN code"></td>
+                                <td><input type="number" class="form-control" step="0.00000001" name="gross_weight[]"
+                                        placeholder="Enter Gross Weight in gram"></td>
+                                <td><input type="number" class="form-control" step="0.000001" name="net_weight[]"
+                                        placeholder="Enter net weight in gram"></td>
+                                <td><input type="number" class="form-control" step="0.000001" name="rate[]"
+                                        placeholder="Enter Rate in Rs."></td>
+                                <td><input type="number" class="form-control" step="0.0000001" name="labour_charge[]"
+                                        placeholder="Enter labour charge"></td>
+                                <td><button type="button" class="btn btn-danger delete-product">Delete</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <button type="button" class="btn btn-success" id="addProduct">Add Another Product</button>
+            <button type="submit" class="btn btn-success" name="submit-1">Submit</button>
+           
+    </div>
+    </div>
+    <!-- Final Bill Section -->
+    <div class="row">
+        <div class="col-md-12">
+            
         </div>
+    </div>
 
-    <!--code for pdf  -->
+    </form>
+    </div>
 
+    <script>
+    // JavaScript code for adding new product rows and deleting them
+    document.addEventListener('DOMContentLoaded', function() {
+        const addProductButton = document.getElementById('addProduct');
+        const productTableBody = document.querySelector('table tbody');
 
+        addProductButton.addEventListener('click', function() {
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                    <td><input type="text" class="form-control" name="description[]" placeholder="Description"></td>
+                    <td><input type="text" class="form-control" name="karet[]" placeholder="Enter Karet"></td>
+                    <td><input type="text" class="form-control" name="hsncode[]" placeholder="Enter HSN code"></td>
+                    <td><input type="number" class="form-control" step="0.00000001" name="gross_weight[]" placeholder="Enter Gross Weight in gram"></td>
+                    <td><input type="number" class="form-control" step="0.000001" name="net_weight[]" placeholder="Enter net weight in gram"></td>
+                    <td><input type="number" class="form-control" step="0.000001" name="rate[]" placeholder="Enter Rate in Rs."></td>
+                    <td><input type="number" class="form-control" step="0.0000001" name="labour_charge[]" placeholder="Enter labour charge"></td>
+                    <td><button type="button" class="btn btn-danger delete-product">Delete</button></td>
+                `;
 
+            productTableBody.appendChild(newRow);
+        });
 
+        // Delete product row
+        productTableBody.addEventListener('click', function(event) {
+            if (event.target.classList.contains('delete-product')) {
+                event.preventDefault();
+                event.target.closest('tr').remove();
+            }
+        });
+    });
+    </script>
 </body>
-
 
 </html>
